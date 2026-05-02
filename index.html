@@ -276,9 +276,10 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
   .rcard{width:240px}
   .hero-section{background-position:center 25%;background-size:cover;min-height:80svh}
 }
+#product-modal,#grape-modal,#bas-modal,#pist-modal{align-items:flex-end;justify-content:flex-start}
 @media(min-width:640px){
-  #product-modal,#grape-modal,#bas-modal,#pist-modal{align-items:center!important;justify-content:center!important}
-  #product-modal>div,#grape-modal>div,#bas-modal>div,#pist-modal>div{max-width:480px!important;border-radius:20px!important;width:100%}
+  #product-modal,#grape-modal,#bas-modal,#pist-modal{align-items:center;justify-content:center}
+  #product-modal>div,#grape-modal>div,#bas-modal>div,#pist-modal>div{max-width:480px;border-radius:20px;width:100%}
 }
 @keyframes pop-in{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 #order-success{animation:none}
@@ -1508,7 +1509,7 @@ async function submitOrder(){
 // ───────────────────────────────────────────────────────────────
 
 </script>
-<div id="product-modal" role="dialog" aria-modal="true" aria-labelledby="pm-name" style="display:none;position:fixed;inset:0;z-index:150;align-items:flex-end;background:rgba(0,0,0,.55)" onclick="if(event.target===this)closeProductModal()">
+<div id="product-modal" role="dialog" aria-modal="true" aria-labelledby="pm-name" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.55)" onclick="if(event.target===this)closeProductModal()">
   <div style="background:#fff;width:100%;border-radius:20px 20px 0 0;max-height:90vh;overflow-y:auto">
     <div style="position:relative">
       <img id="pm-img" src="" alt="" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:20px 20px 0 0">
@@ -1524,7 +1525,7 @@ async function submitOrder(){
     </div>
   </div>
 </div>
-<div id="grape-modal" role="dialog" aria-modal="true" aria-labelledby="grape-modal-title" style="display:none;position:fixed;inset:0;z-index:150;align-items:flex-end;background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeGrapeModal()">
+<div id="grape-modal" role="dialog" aria-modal="true" aria-labelledby="grape-modal-title" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeGrapeModal()">
   <div style="background:#fff;width:100%;border-radius:20px 20px 0 0;padding:24px 20px 32px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <h3 id="grape-modal-title" style="font-family:'Noto Serif Arabic',serif;font-size:1.1rem;font-weight:800;color:#1C3020">اختر نكهة ورق العنب</h3>
@@ -1565,7 +1566,7 @@ async function submitOrder(){
     <button type="button" onclick="closeGrapeModal()" style="width:100%;padding:14px;border-radius:14px;background:#EBF2EC;color:#1C3020;font-weight:700;font-size:.95rem;border:none;cursor:pointer">تم</button>
   </div>
 </div>
-<div id="bas-modal" role="dialog" aria-modal="true" aria-labelledby="bas-modal-title" style="display:none;position:fixed;inset:0;z-index:150;align-items:flex-end;background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeBasModal()">
+<div id="bas-modal" role="dialog" aria-modal="true" aria-labelledby="bas-modal-title" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeBasModal()">
   <div style="background:#fff;width:100%;border-radius:20px 20px 0 0;padding:24px 20px 32px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <h3 id="bas-modal-title" style="font-family:'Noto Serif Arabic',serif;font-size:1.1rem;font-weight:800;color:#1C3020">اختر حجم البسبوسة</h3>
@@ -1596,7 +1597,7 @@ async function submitOrder(){
     <button type="button" onclick="closeBasModal()" style="width:100%;padding:14px;border-radius:14px;background:#EBF2EC;color:#1C3020;font-weight:700;font-size:.95rem;border:none;cursor:pointer">تم</button>
   </div>
 </div>
-<div id='pist-modal' role='dialog' aria-modal='true' style='display:none;position:fixed;inset:0;z-index:150;align-items:flex-end;background:rgba(0,0,0,.5)' onclick='if(event.target===this)closePistModal()'>
+<div id='pist-modal' role='dialog' aria-modal='true' style='display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5)' onclick='if(event.target===this)closePistModal()'>
   <div style='background:#fff;width:100%;border-radius:20px 20px 0 0;padding:24px 20px 32px;max-height:90vh;overflow-y:auto'>
     <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:20px'>
       <h3 style='font-family:"Noto Serif Arabic",serif;font-size:1.1rem;font-weight:800;color:#1C3020'>اختر نوع الفستقية</h3>
