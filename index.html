@@ -584,11 +584,12 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// PAYMENT CONFIG — TODO: Fill apiKey + set enabled:true to activate
+// PAYMENT CONFIG — NEVER put a Tap Payments SECRET key here.
+// Use a server-side function (Vercel/Supabase Edge) that holds the secret and returns a charge ID only.
 // ═══════════════════════════════════════════════════════════════
 const PAYMENT_CONFIG = {
   provider: 'tap',        // 'tap' | 'myfatoorah' | 'telr'
-  apiKey: '',             // TODO: Paste your Tap Payments secret key here
+  apiKey: '',             // PUBLIC key only — secret key goes server-side ONLY
   currency: 'KWD',
   country: 'KW',
   lang: 'ar',

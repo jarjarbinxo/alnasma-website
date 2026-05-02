@@ -440,7 +440,7 @@ function toggleExpand(tr, order) {
   ).join('');
 
   const locLink = order.location
-    ? `<a href="https://maps.google.com/?q=${order.location}" target="_blank" class="underline" style="color:#4E7854;">📍 فتح الخريطة</a>`
+    ? `<a href="https://maps.google.com/?q=${escHtml(order.location)}" target="_blank" class="underline" style="color:#4E7854;">📍 فتح الخريطة</a>`
     : (order.address ? escHtml(order.address) : '—');
 
   const expand = document.createElement('tr');
