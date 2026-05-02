@@ -635,8 +635,8 @@ const products=[
   {id:1471878,cat:'basbousa',name:'بسبوسه',price:6.750,img:'imgs/basbousa.webp'},
   {id:1544739,cat:'basbousa',name:'ميني بسبوسه',price:7.500,img:'imgs/mini-basbousa.webp'},
   {id:1471875,cat:'fostkya',name:'فستقية كلاسيك',price:7.750,img:'imgs/pistachio.webp'},
-  {id:1471876,cat:'fostkya',name:'فستقية سادة',price:7.750,img:'imgs/pistachio-plain.webp'},
-  {id:1471877,cat:'fostkya',name:'فستقية زعفران',price:7.750,img:'imgs/pistachio-saffron.webp'},
+  {id:1471876,cat:'fostkya',name:'فستقية سادة',price:7.750,img:'imgs/pistachio-plain.png'},
+  {id:1471877,cat:'fostkya',name:'فستقية زعفران',price:7.750,img:'imgs/pistachio-saffron.png'},
   {id:1471883,cat:'drinks',name:'قهوه عربي',price:3.500,img:'imgs/arabic-coffee.webp',desc:'دلّة قهوة عربية بالهيل والزعفران جاهزة للتقديم'},
 ];
 const pairings={
@@ -664,7 +664,7 @@ const basImgs={1471878:'imgs/basbousa.webp',1544739:'imgs/mini-basbousa.webp'};
 const basNames={1471878:'بسبوسه',1544739:'ميني بسبوسه'};
 const basPrices={1471878:6.750,1544739:7.500};
 let pistVariant=1471875;
-const pistImgs={1471875:'imgs/pistachio.webp',1471876:'imgs/pistachio-plain.webp',1471877:'imgs/pistachio-saffron.webp'};
+const pistImgs={1471875:'imgs/pistachio.webp',1471876:'imgs/pistachio-plain.png',1471877:'imgs/pistachio-saffron.png'};
 const reviews=[
   {name:'أم سلطان',stars:5,text:'كيكة التايجر خذيتها حق الجمعه وبصراحة اختفت بسرعه 😂 الكريمه خفيفه والكيك نفسه مو ناشف، كل الديرة تسأل من وين.',product:'كيكة التايجر'},
   {name:'يوسف',stars:5,text:'ورق العنب السبايسي عجيب، الحمضه والحراره موزونين عدل. وصل الساعة 11 الليل وكان بعده حار اشوي، بس التوصيل تأخر شوي.',product:'ورق عنب سبايسي'},
@@ -1614,7 +1614,7 @@ async function submitOrder(){
         </div>
       </div>
       <div id='pm-card-1471876' onclick='setPistVariant(1471876)' style='border-radius:14px;border:2px solid #D5E6D7;overflow:hidden;cursor:pointer;transition:all .2s;background:#fff'>
-        <img src='imgs/pistachio-plain.webp' alt='فستقية سادة' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
+        <img src='imgs/pistachio-plain.png' alt='فستقية سادة' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
         <div style='padding:10px 8px'>
           <div style='font-weight:700;color:#1C3020;font-size:.8rem;margin-bottom:4px'>فستقية سادة</div>
           <div style='display:flex;align-items:center;justify-content:space-between'>
@@ -1624,7 +1624,7 @@ async function submitOrder(){
         </div>
       </div>
       <div id='pm-card-1471877' onclick='setPistVariant(1471877)' style='border-radius:14px;border:2px solid #D5E6D7;overflow:hidden;cursor:pointer;transition:all .2s;background:#fff'>
-        <img src='imgs/pistachio-saffron.webp' alt='فستقية زعفران' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
+        <img src='imgs/pistachio-saffron.png' alt='فستقية زعفران' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
         <div style='padding:10px 8px'>
           <div style='font-weight:700;color:#1C3020;font-size:.8rem;margin-bottom:4px'>فستقية زعفران</div>
           <div style='display:flex;align-items:center;justify-content:space-between'>
