@@ -228,8 +228,13 @@ let expandedRow = null;
 // ──────────────────────────────────────────────
 // INIT
 // ──────────────────────────────────────────────
+const SUPA_URL = 'https://hjwlqredmacuhwclelmv.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhqd2xxcmVkbWFjdWh3Y2xlbG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNjg5ODksImV4cCI6MjA4NTk0NDk4OX0.67NAX0Kc_XuLLszFpxoLgIen6CPfqHZTZy_qG6R-1J8';
+
 document.addEventListener('DOMContentLoaded', () => {
   setHeaderDate();
+  document.getElementById('supa-url').value = SUPA_URL;
+  document.getElementById('supa-key').value = SUPA_KEY;
   loadOrders();
 });
 
