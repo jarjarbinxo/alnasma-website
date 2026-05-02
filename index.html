@@ -304,6 +304,8 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
         <span id="step-pill-1" class="step-pill active">الطلب</span>
         <span style="color:rgba(255,255,255,.3);font-size:.7rem">&#8592;</span>
         <span id="step-pill-2" class="step-pill inactive">العنوان</span>
+        <span style="color:rgba(255,255,255,.3);font-size:.7rem">&#8592;</span>
+        <span id="step-pill-3" class="step-pill inactive">الدفع</span>
       </div>
       <button type="button" onclick="closeCart()" aria-label="إغلاق السلة" class="rounded-full bg-white/8 hover:bg-white/15 text-white flex items-center justify-center transition-all text-base" style="width:44px;height:44px">&#10005;</button>
     </div>
@@ -398,6 +400,42 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
           <textarea id="addr-notes" class="addr-input" rows="2" placeholder="&#1571;&#1610; &#1578;&#1593;&#1604;&#1610;&#1605;&#1575;&#1578; &#1582;&#1575;&#1589;&#1577; &#1604;&#1604;&#1578;&#1608;&#1589;&#1610;&#1604;" style="resize:none"></textarea>
         </div>
       </div>
+    </div>
+
+    <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0">
+      <button type="button" onclick="goToStep3()" style="width:100%;padding:16px;border-radius:18px;background:linear-gradient(135deg,#4E7854,#6A9E70);color:#fff;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:10px">
+        التالي ← اختر طريقة الدفع
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: PAYMENT -->
+  <div id="cart-step3" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+    <div style="padding:14px 20px 8px;flex-shrink:0">
+      <button type="button" onclick="goToStep2FromStep3()" style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.6);background:none;border:none;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.88rem;padding:0" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.6)'">
+        <span style="font-size:1rem">&#8594;</span> رجوع
+      </button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px">
+      <p style="color:rgba(255,255,255,.7);font-size:.88rem;font-weight:600;margin-bottom:16px;font-family:'Cairo',sans-serif">اختر طريقة الدفع</p>
+
+      <label class="pay-method-card selected" id="pay-card-cash" data-method="cash" onclick="selectPayMethod('cash')">
+        <input type="radio" name="pay-method" value="cash" checked>
+        <span style="font-size:1.3rem">💵</span>
+        <div style="flex:1">
+          <div style="color:#fff;font-weight:700;font-size:.92rem;font-family:'Cairo',sans-serif">كاش</div>
+          <div style="color:rgba(255,255,255,.45);font-size:.75rem;font-family:'Cairo',sans-serif">الدفع نقداً عند الاستلام</div>
+        </div>
+      </label>
+
+      <label class="pay-method-card" id="pay-card-tap" data-method="tap" onclick="selectPayMethod('tap')">
+        <input type="radio" name="pay-method" value="tap">
+        <span style="font-size:1.3rem">📲</span>
+        <div style="flex:1">
+          <div style="color:#fff;font-weight:700;font-size:.92rem;font-family:'Cairo',sans-serif">تاب / Apple Pay</div>
+          <div style="color:rgba(255,255,255,.45);font-size:.75rem;font-family:'Cairo',sans-serif">الدفع عند التوصيل</div>
+        </div>
+      </label>
     </div>
 
     <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0">
@@ -1092,6 +1130,36 @@ function goToStep1(){
   si.style.display='flex';
   document.getElementById('step-pill-1').className='step-pill active';
   document.getElementById('step-pill-2').className='step-pill inactive';
+  document.getElementById('step-pill-3').className='step-pill inactive';
+}
+
+function goToStep3(){
+  if(!validateStep2())return;
+  checkoutStep=3;
+  document.getElementById('cart-step2').style.display='none';
+  document.getElementById('cart-step3').style.display='flex';
+  document.getElementById('step-pill-1').className='step-pill inactive';
+  document.getElementById('step-pill-2').className='step-pill inactive';
+  document.getElementById('step-pill-3').className='step-pill active';
+}
+
+function goToStep2FromStep3(){
+  checkoutStep=2;
+  document.getElementById('cart-step3').style.display='none';
+  document.getElementById('cart-step2').style.display='flex';
+  document.getElementById('step-pill-1').className='step-pill inactive';
+  document.getElementById('step-pill-2').className='step-pill active';
+  document.getElementById('step-pill-3').className='step-pill inactive';
+}
+
+function selectPayMethod(method){
+  document.querySelectorAll('.pay-method-card').forEach(c=>c.classList.remove('selected'));
+  const card=document.getElementById('pay-card-'+method);
+  if(card){
+    card.classList.add('selected');
+    const radio=card.querySelector('input[type=radio]');
+    if(radio)radio.checked=true;
+  }
 }
 
 function openCart(){
@@ -1105,6 +1173,7 @@ function goToStep1Silently(){
   checkoutStep=1;
   _geoCoords=null;
   document.getElementById('cart-step2').style.display='none';
+  document.getElementById('cart-step3').style.display='none';
   document.getElementById('cart-step1').style.display='flex';
   document.getElementById('step-indicator').style.display='none';
   resetGeoUI();
@@ -1420,7 +1489,7 @@ async function sendViaEmailJS(orderData){
     items: itemsList,
     total: orderData.total.toFixed(3)+' د.ك',
     address: addressText,
-    pay_method: orderData.payMethod==='cod'?'الدفع عند الاستلام':'بطاقة ائتمانية',
+    pay_method: orderData.payMethod==='tap'?'تاب / Apple Pay':'كاش',
     to_email: ORDER_CONFIG.emailjs.toEmail
   }, ORDER_CONFIG.emailjs.publicKey);
   return true;
@@ -1463,7 +1532,7 @@ function sendOrderWhatsapp(orderData){
   msg+=addrText+'\n\n';
   msg+=`🛒 *الطلب:*\n${itemsList}\n\n`;
   msg+=`💰 *المجموع: ${orderData.total.toFixed(3)} د.ك*\n`;
-  msg+=`💵 *الدفع:* ${orderData.payMethod==='cod'?'عند الاستلام':'بطاقة'}`;
+  msg+=`💵 *الدفع:* ${orderData.payMethod==='tap'?'تاب / Apple Pay':'كاش'}`;
   window.open(`https://wa.me/${ORDER_CONFIG.whatsapp.number}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
