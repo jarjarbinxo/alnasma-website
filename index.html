@@ -235,7 +235,6 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
 /* REDUCED MOTION */
 @media(prefers-reduced-motion:reduce){
   .reviews-track{animation:none}
-  #review-bubbles{display:none}
   .reveal{opacity:1;transform:none;transition:none}
 }
 
@@ -276,6 +275,10 @@ h1,h2,.display{font-family:'Noto Serif Arabic','Georgia',serif}
   #about{padding-top:4rem!important;padding-bottom:4rem!important}
   .rcard{width:240px}
   .hero-section{background-position:center 25%;background-size:cover;min-height:80svh}
+}
+@media(min-width:640px){
+  #product-modal,#grape-modal,#bas-modal,#pist-modal{align-items:center;justify-content:center}
+  #product-modal>div,#grape-modal>div,#bas-modal>div,#pist-modal>div{max-width:480px;border-radius:20px}
 }
 @keyframes pop-in{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 #order-success{animation:none}
@@ -631,7 +634,9 @@ const products=[
   {id:1513944,cat:'grape',name:'ورق عنب سادة',price:6.750,img:'imgs/grape-plain.webp'},
   {id:1471878,cat:'basbousa',name:'بسبوسه',price:6.750,img:'imgs/basbousa.webp'},
   {id:1544739,cat:'basbousa',name:'ميني بسبوسه',price:7.500,img:'imgs/mini-basbousa.webp'},
-  {id:1471875,cat:'fostkya',name:'فستقيه بستاشيو',price:7.750,img:'imgs/pistachio.webp',desc:'كريمة ناعمة على قاعدة ذهبية مزيّنة بخطوط الفستق الأخضر'},
+  {id:1471875,cat:'fostkya',name:'فستقية كلاسيك',price:7.750,img:'imgs/pistachio.webp'},
+  {id:1471876,cat:'fostkya',name:'فستقية سادة',price:7.750,img:'imgs/pistachio-plain.webp'},
+  {id:1471877,cat:'fostkya',name:'فستقية زعفران',price:7.750,img:'imgs/pistachio-saffron.webp'},
   {id:1471883,cat:'drinks',name:'قهوه عربي',price:3.500,img:'imgs/arabic-coffee.webp',desc:'دلّة قهوة عربية بالهيل والزعفران جاهزة للتقديم'},
 ];
 const pairings={
@@ -658,6 +663,8 @@ let basVariant=1471878;
 const basImgs={1471878:'imgs/basbousa.webp',1544739:'imgs/mini-basbousa.webp'};
 const basNames={1471878:'بسبوسه',1544739:'ميني بسبوسه'};
 const basPrices={1471878:6.750,1544739:7.500};
+let pistVariant=1471875;
+const pistImgs={1471875:'imgs/pistachio.webp',1471876:'imgs/pistachio-plain.webp',1471877:'imgs/pistachio-saffron.webp'};
 const reviews=[
   {name:'أم سلطان',stars:5,text:'كيكة التايجر خذيتها حق الجمعه وبصراحة اختفت بسرعه 😂 الكريمه خفيفه والكيك نفسه مو ناشف، كل الديرة تسأل من وين.',product:'كيكة التايجر'},
   {name:'يوسف',stars:5,text:'ورق العنب السبايسي عجيب، الحمضه والحراره موزونين عدل. وصل الساعة 11 الليل وكان بعده حار اشوي، بس التوصيل تأخر شوي.',product:'ورق عنب سبايسي'},
@@ -696,17 +703,18 @@ function renderBestsellers(){
   if(!grid)return;
   grid.innerHTML=bsIds.map(id=>{
     const p=products.find(x=>x.id===id);if(!p)return'';
-    const inCart=cart.find(c=>c.id===p.id);
-    const qty=inCart?inCart.qty:0;
-    const bsCardClick=p.cat==='grape'?'openGrapeModal()':p.cat==='basbousa'?'openBasModal()':`openProductModal(${p.id})`;
-    const bsBtnClick=p.cat==='grape'?'openGrapeModal()':p.cat==='basbousa'?'openBasModal()':`addToCart(${p.id})`;
+    const qty=p.cat==='fostkya'?[1471875,1471876,1471877].reduce((sum,pid)=>{const c=cart.find(x=>x.id===pid);return sum+(c?c.qty:0);},0):(cart.find(c=>c.id===p.id)?.qty||0);
+    const bsImg=p.cat==='fostkya'?pistImgs[pistVariant]:p.img;
+    const bsName=p.cat==='fostkya'?'فستقية بستاشيو':p.name;
+    const bsCardClick=p.cat==='grape'?'openGrapeModal()':p.cat==='basbousa'?'openBasModal()':p.cat==='fostkya'?'openPistModal()':`openProductModal(${p.id})`;
+    const bsBtnClick=p.cat==='grape'?'openGrapeModal()':p.cat==='basbousa'?'openBasModal()':p.cat==='fostkya'?'openPistModal()':`addToCart(${p.id})`;
     return`<div class="pcard rounded-2xl overflow-hidden cursor-pointer flex flex-col relative" onclick="${bsCardClick}">
       <div class="absolute top-2 right-2 z-10 bg-g text-white text-xs font-bold px-2 py-0.5 rounded-full" style="font-size:.65rem">🔥 الأكثر</div>
       <div class="pimg-wrap" style="aspect-ratio:1/1;overflow:hidden;background:#EBF2EC">
-        <img src="${p.img.startsWith('imgs/')?p.img:CDN+p.img}" alt="${p.name}" class="pimg" loading="lazy">
+        <img src="${bsImg.startsWith('imgs/')?bsImg:CDN+bsImg}" alt="${bsName}" class="pimg" loading="lazy">
       </div>
       <div class="p-3 flex flex-col flex-1">
-        <h3 class="font-semibold text-g-dkr leading-snug mb-2 flex-1" style="font-size:.78rem">${p.name}</h3>
+        <h3 class="font-semibold text-g-dkr leading-snug mb-2 flex-1" style="font-size:.78rem">${bsName}</h3>
         <div class="flex items-center justify-between mt-auto">
           <span class="text-g font-black" style="font-size:.95rem;font-family:'Noto Serif Arabic',serif">${p.price.toFixed(3)}</span>
           <button type="button" onclick="event.stopPropagation();${bsBtnClick}" class="btn-add w-8 h-8 rounded-xl flex items-center justify-center shadow-md ${qty>0?'has-qty':''}" style="font-size:.8rem;min-width:2rem">
@@ -800,6 +808,26 @@ function addBasFlavor(id){
     else{qEl.innerHTML='<span style="font-size:1.1rem;line-height:1">+</span>';}
   }
 }
+function openPistModal(){
+  document.getElementById('pist-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+  ['1471875','1471876','1471877'].forEach(sid=>{
+    const btn=document.getElementById('pm-card-'+sid);
+    if(btn){
+      const active=parseInt(sid)===pistVariant;
+      btn.style.borderColor=active?'#2E5D34':'#D5E6D7';
+      btn.style.background=active?'#EBF2EC':'#fff';
+    }
+    const qEl=document.getElementById('pm-qty-'+sid);
+    if(!qEl)return;
+    const c=cart.find(x=>x.id===parseInt(sid));
+    if(c&&c.qty>0){qEl.innerHTML=`<span class="font-black text-xs">${c.qty}</span>`;}
+    else{qEl.innerHTML='<span style="font-size:1.1rem;line-height:1">+</span>';}
+  });
+}
+function closePistModal(){document.getElementById('pist-modal').style.display='none';if(!document.getElementById('cart-drawer').classList.contains('open'))document.body.style.overflow='';}
+function setPistVariant(id){pistVariant=id;closePistModal();renderProducts();renderBestsellers();}
+function addPistToCart(id){pistVariant=id;const p=products.find(x=>x.id===id);if(!p)return;const existing=cart.find(c=>c.id===id);if(existing){existing.qty++;}else{cart.push({id,name:p.name,price:p.price,img:p.img,qty:1});}saveCart();renderCartItems();updateCartBadge();closePistModal();renderProducts();renderBestsellers();}
 
 let _pmId=null;
 function openProductModal(id){
@@ -863,11 +891,14 @@ function renderProducts(){
   const grid=document.getElementById('products-grid');
   const rawList=activeCat==='all'?products:products.filter(p=>p.cat===activeCat);
   const grapeIds=[1513942,1513943,1513944];
+  const pistIds=[1471875,1471876,1471877];
   let grapeInserted=false;
   const list=[];
   rawList.forEach(p=>{
     if(grapeIds.includes(p.id)){
       if(!grapeInserted){list.push({_grapeCard:true});grapeInserted=true;}
+    } else if(pistIds.includes(p.id)){
+      list.push(p);
     } else {
       list.push(p);
     }
@@ -882,8 +913,17 @@ function renderProducts(){
       list2.push(p);
     }
   });
-  document.getElementById('no-products').classList.toggle('hidden',list2.length>0);
-  grid.innerHTML=list2.map(p=>{
+  let pistInserted=false;
+  const list3=[];
+  list2.forEach(p=>{
+    if(pistIds.includes(p.id)){
+      if(!pistInserted){list3.push({_pistCard:true});pistInserted=true;}
+    } else {
+      list3.push(p);
+    }
+  });
+  document.getElementById('no-products').classList.toggle('hidden',list3.length>0);
+  grid.innerHTML=list3.map(p=>{
     if(p._grapeCard){
       const anyInCart=[1513942,1513943,1513944].reduce((sum,id)=>{const c=cart.find(x=>x.id===id);return sum+(c?c.qty:0);},0);
       return`<div class="pcard rounded-2xl overflow-hidden cursor-pointer flex flex-col" onclick="openGrapeModal()">
@@ -892,7 +932,7 @@ function renderProducts(){
         </div>
         <div class="p-4 flex flex-col flex-1">
           <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">ورق عنب</h3>
-          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">ورق عنب محشي باللحم والأرز مقدّم بثلاث نكهات للاختيار</p>
+          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.62);line-height:1.4">ورق عنب محشي باللحم والأرز مقدّم بثلاث نكهات للاختيار</p>
           <div class="flex items-center justify-between mt-auto">
             <div>
               <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">6.750</span>
@@ -913,13 +953,34 @@ function renderProducts(){
         </div>
         <div class="p-4 flex flex-col flex-1">
           <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">بسبوسه</h3>
-          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">سميد ذهبي مشرّب بالعسل مزيّن باللوز والفستق</p>
+          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.62);line-height:1.4">سميد ذهبي مشرّب بالعسل مزيّن باللوز والفستق</p>
           <div class="flex items-center justify-between mt-auto">
             <div>
               <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">${basPrices[basVariant].toFixed(3)}</span>
               <span class="text-g-dkr/30 text-xs"> د.ك</span>
             </div>
             <button type="button" onclick="event.stopPropagation();openBasModal()" class="btn-add w-9 h-9 rounded-xl flex items-center justify-center shadow-md font-black text-sm ${anyInCart>0?'has-qty':''}">
+              ${anyInCart>0?`<span class="font-black">${anyInCart}</span>`:'<span class="text-xl font-black leading-none">+</span>'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }
+    if(p._pistCard){
+      const anyInCart=[1471875,1471876,1471877].reduce((sum,id)=>{const c=cart.find(x=>x.id===id);return sum+(c?c.qty:0);},0);
+      return`<div class="pcard rounded-2xl overflow-hidden cursor-pointer flex flex-col" onclick="openPistModal()">
+        <div class="pimg-wrap" style="aspect-ratio:1/1;overflow:hidden;background:#EBF2EC">
+          <img src="${pistImgs[pistVariant]}" alt="فستقية بستاشيو" class="pimg" loading="lazy">
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">فستقية بستاشيو</h3>
+          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.62);line-height:1.4">كريمة ناعمة على قاعدة ذهبية مزيّنة بخطوط الفستق الأخضر</p>
+          <div class="flex items-center justify-between mt-auto">
+            <div>
+              <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">7.750</span>
+              <span class="text-g-dkr/30 text-xs"> د.ك</span>
+            </div>
+            <button type="button" onclick="event.stopPropagation();openPistModal()" class="btn-add w-9 h-9 rounded-xl flex items-center justify-center shadow-md font-black text-sm ${anyInCart>0?'has-qty':''}">
               ${anyInCart>0?`<span class="font-black">${anyInCart}</span>`:'<span class="text-xl font-black leading-none">+</span>'}
             </button>
           </div>
@@ -934,7 +995,7 @@ function renderProducts(){
       </div>
       <div class="p-4 flex flex-col flex-1">
         <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">${p.name}</h3>
-        <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">${p.desc||''}</p>
+        <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.62);line-height:1.4">${p.desc||''}</p>
         <div class="flex items-center justify-between mt-auto">
           <div>
             <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">${p.price.toFixed(3)}</span>
@@ -1533,6 +1594,46 @@ async function submitOrder(){
       </div>
     </div>
     <button type="button" onclick="closeBasModal()" style="width:100%;padding:14px;border-radius:14px;background:#EBF2EC;color:#1C3020;font-weight:700;font-size:.95rem;border:none;cursor:pointer">تم</button>
+  </div>
+</div>
+<div id='pist-modal' role='dialog' aria-modal='true' style='display:none;position:fixed;inset:0;z-index:150;align-items:flex-end;background:rgba(0,0,0,.5)' onclick='if(event.target===this)closePistModal()'>
+  <div style='background:#fff;width:100%;border-radius:20px 20px 0 0;padding:24px 20px 32px;max-height:90vh;overflow-y:auto'>
+    <div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:20px'>
+      <h3 style='font-family:"Noto Serif Arabic",serif;font-size:1.1rem;font-weight:800;color:#1C3020'>اختر نوع الفستقية</h3>
+      <button type='button' onclick='closePistModal()' style='width:36px;height:36px;border-radius:50%;background:#F5F7F5;border:none;cursor:pointer;font-size:1rem'>×</button>
+    </div>
+    <div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px'>
+      <div id='pm-card-1471875' onclick='setPistVariant(1471875)' style='border-radius:14px;border:2px solid #D5E6D7;overflow:hidden;cursor:pointer;transition:all .2s;background:#fff'>
+        <img src='imgs/pistachio.webp' alt='فستقية كلاسيك' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
+        <div style='padding:10px 8px'>
+          <div style='font-weight:700;color:#1C3020;font-size:.8rem;margin-bottom:4px'>فستقية كلاسيك</div>
+          <div style='display:flex;align-items:center;justify-content:space-between'>
+            <span style='color:#4E7854;font-size:.78rem;font-weight:700'>7.750</span>
+            <button type='button' id='pm-qty-1471875' onclick='event.stopPropagation();addPistToCart(1471875)' style='width:32px;height:32px;border-radius:8px;background:#2E5D34;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem'></button>
+          </div>
+        </div>
+      </div>
+      <div id='pm-card-1471876' onclick='setPistVariant(1471876)' style='border-radius:14px;border:2px solid #D5E6D7;overflow:hidden;cursor:pointer;transition:all .2s;background:#fff'>
+        <img src='imgs/pistachio-plain.webp' alt='فستقية سادة' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
+        <div style='padding:10px 8px'>
+          <div style='font-weight:700;color:#1C3020;font-size:.8rem;margin-bottom:4px'>فستقية سادة</div>
+          <div style='display:flex;align-items:center;justify-content:space-between'>
+            <span style='color:#4E7854;font-size:.78rem;font-weight:700'>7.750</span>
+            <button type='button' id='pm-qty-1471876' onclick='event.stopPropagation();addPistToCart(1471876)' style='width:32px;height:32px;border-radius:8px;background:#2E5D34;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem'></button>
+          </div>
+        </div>
+      </div>
+      <div id='pm-card-1471877' onclick='setPistVariant(1471877)' style='border-radius:14px;border:2px solid #D5E6D7;overflow:hidden;cursor:pointer;transition:all .2s;background:#fff'>
+        <img src='imgs/pistachio-saffron.webp' alt='فستقية زعفران' loading='lazy' style='width:100%;height:130px;object-fit:cover;display:block'>
+        <div style='padding:10px 8px'>
+          <div style='font-weight:700;color:#1C3020;font-size:.8rem;margin-bottom:4px'>فستقية زعفران</div>
+          <div style='display:flex;align-items:center;justify-content:space-between'>
+            <span style='color:#4E7854;font-size:.78rem;font-weight:700'>7.750</span>
+            <button type='button' id='pm-qty-1471877' onclick='event.stopPropagation();addPistToCart(1471877)' style='width:32px;height:32px;border-radius:8px;background:#2E5D34;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem'></button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div id="order-success" style="display:none;position:fixed;inset:0;z-index:200;background:#0a1a0c;overflow-y:auto;padding:0">
