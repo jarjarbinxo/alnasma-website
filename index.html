@@ -1423,6 +1423,14 @@ async function submitOrder(){
       results.supabase=await saveToSupabase(orderData);
     }
   } catch(e){ console.warn('Supabase failed:',e); }
+  // Notify bot (fire-and-forget — don't block success screen)
+  try {
+    fetch('https://app.focobot.com/webhook/website-order',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(orderData)
+    }).catch(()=>{});
+  } catch(e){}
   // Restore button
   if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
   // Show success screen
