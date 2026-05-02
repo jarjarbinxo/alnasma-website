@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النسمة سويت — لوحة الطلبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+      colors: {
+        dg:   '#1C3020',
+        mg:   '#4E7854',
+        lg:   '#6A9E70',
+        pale: '#EAF3EB',
+        gold: '#C9A84C',
+        gold2:'#9E7A2A',
+      }
+    }
+  }
+}
+</script>
+<style>
+* { font-family: 'Cairo', sans-serif; }
+body { background: #f0f4f0; color: #1C3020; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #4E7854; border-radius: 3px; }
+
+.status-new      { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+.status-delivery { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+.status-done     { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+
+.row-expand td { background:#f8faf8; }
+
+tr.order-row { cursor:pointer; transition: background 0.15s; }
+tr.order-row:hover { background:#EAF3EB; }
+
+.btn-wa  { background:#25D366; color:#fff; }
+.btn-wa:hover { background:#1aad55; }
+.btn-done { background:#4E7854; color:#fff; }
+.btn-done:hover { background:#1C3020; }
+.btn-print { background:#C9A84C; color:#fff; }
+.btn-print:hover { background:#9E7A2A; }
+
+.spinner {
+  display:inline-block; width:18px; height:18px;
+  border:2px solid #C9A84C; border-top-color:transparent;
+  border-radius:50%; animation:spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#supabase-panel { transition: max-height 0.3s ease, opacity 0.3s ease; overflow:hidden; }
+
+.filter-btn { border:1px solid #4E7854; color:#4E7854; background:#fff; }
+.filter-btn.active { background:#4E7854; color:#fff; }
+.filter-btn:hover { background:#EAF3EB; }
+.filter-btn.active:hover { background:#1C3020; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- PASSWORD GATE (handled in JS on load) -->
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header style="background:#1C3020;" class="shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold text-white leading-tight">
+        🍯 النسمة سويت
+      </h1>
+      <p class="text-sm" style="color:#C9A84C;">لوحة إدارة الطلبات</p>
+    </div>
+    <div class="text-left text-sm" style="color:#6A9E70;" id="header-date"></div>
+  </div>
+</header>
+
+<!-- ══════════════ STATS BAR ══════════════ -->
+<div style="background:#2E4D33;" class="border-b border-green-900">
+  <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-3 gap-4 text-center">
+    <div>
+      <div class="text-2xl font-bold text-white" id="stat-count">0</div>
+      <div class="text-xs" style="color:#6A9E70;">طلبات اليوم</div>
+    </div>
+    <div>
+      <div class="text-2xl font-bold" style="color:#C9A84C;" id="stat-revenue">0.000 د.ك</div>
+      <div class="text-xs" style="color:#6A9E70;">إيرادات اليوم</div>
+    </div>
+    <div>
+      <div class="text-2xl font-bold" style="color:#fde047;" id="stat-pending">0</div>
+      <div class="text-xs" style="color:#6A9E70;">طلبات معلقة</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SUPABASE PANEL ══════════════ -->
+<div class="max-w-7xl mx-auto px-4 mt-4">
+  <button onclick="toggleSupabase()"
+    class="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border"
+    style="border-color:#C9A84C; color:#C9A84C; background:#fff;">
+    <span id="supa-arrow">▼</span> ربط Supabase (اختياري)
+  </button>
+  <div id="supabase-panel" style="max-height:0; opacity:0;">
+    <div class="mt-3 p-4 rounded-xl border" style="background:#fff; border-color:#C9A84C33;">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-semibold mb-1" style="color:#4E7854;">Supabase URL</label>
+          <input id="supa-url" type="text" placeholder="https://xxxx.supabase.co"
+            class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none"
+            style="border-color:#4E7854; direction:ltr;">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1" style="color:#4E7854;">Anon Key</label>
+          <input id="supa-key" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
+            class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none"
+            style="border-color:#4E7854; direction:ltr;">
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="fetchSupabase()"
+          class="px-5 py-2 rounded-lg text-sm font-bold text-white transition"
+          style="background:#4E7854;"
+          id="supa-btn">
+          تحميل الطلبات من Supabase
+        </button>
+        <span id="supa-spinner" class="hidden"><span class="spinner"></span></span>
+        <span id="supa-msg" class="text-sm hidden"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CONTROLS ══════════════ -->
+<div class="max-w-7xl mx-auto px-4 mt-5">
+  <div class="bg-white rounded-xl shadow-sm p-4 flex flex-wrap gap-3 items-center justify-between">
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-2">
+      <button onclick="setFilter('all')"   class="filter-btn active px-4 py-1.5 rounded-full text-sm font-semibold" data-f="all">الكل</button>
+      <button onclick="setFilter('new')"   class="filter-btn px-4 py-1.5 rounded-full text-sm font-semibold" data-f="new">جديد</button>
+      <button onclick="setFilter('delivery')" class="filter-btn px-4 py-1.5 rounded-full text-sm font-semibold" data-f="delivery">قيد التوصيل</button>
+      <button onclick="setFilter('done')"  class="filter-btn px-4 py-1.5 rounded-full text-sm font-semibold" data-f="done">تم التوصيل</button>
+    </div>
+    <!-- Search + Sort -->
+    <div class="flex gap-2 flex-wrap">
+      <input id="search-box" type="text" placeholder="بحث بالاسم أو رقم الطلب..."
+        oninput="renderTable()"
+        class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+        style="border-color:#4E7854; min-width:200px;">
+      <select id="sort-select" onchange="renderTable()"
+        class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+        style="border-color:#4E7854;">
+        <option value="newest">الأحدث أولاً</option>
+        <option value="oldest">الأقدم أولاً</option>
+      </select>
+      <button onclick="loadOrders()" title="تحديث"
+        class="px-3 py-1.5 rounded-lg text-sm font-bold text-white"
+        style="background:#4E7854;">⟳ تحديث</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TABLE ══════════════ -->
+<div class="max-w-7xl mx-auto px-4 mt-4 mb-10">
+  <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="background:#1C3020; color:#C9A84C;" class="text-right">
+          <th class="px-3 py-3 font-bold">رقم الطلب</th>
+          <th class="px-3 py-3 font-bold">المستلم</th>
+          <th class="px-3 py-3 font-bold">الجوال</th>
+          <th class="px-3 py-3 font-bold hidden md:table-cell">المنتجات</th>
+          <th class="px-3 py-3 font-bold">المجموع</th>
+          <th class="px-3 py-3 font-bold hidden lg:table-cell">العنوان</th>
+          <th class="px-3 py-3 font-bold hidden lg:table-cell">الدفع</th>
+          <th class="px-3 py-3 font-bold">الوقت</th>
+          <th class="px-3 py-3 font-bold">الحالة</th>
+          <th class="px-3 py-3 font-bold">إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body">
+      </tbody>
+    </table>
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden py-20 text-center">
+      <div class="text-5xl mb-4">🍯</div>
+      <p class="text-lg font-bold" style="color:#4E7854;">لا توجد طلبات بعد</p>
+      <p class="text-sm mt-1" style="color:#6A9E70;">ستظهر الطلبات هنا فور ورودها من الموقع</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PRINT TEMPLATE (hidden) ══════════════ -->
+<div id="print-area" class="hidden"></div>
+
+<script>
+// ──────────────────────────────────────────────
+// CONFIG
+// ──────────────────────────────────────────────
+const ADMIN_PASSWORD = 'alnasma2025';
+const LS_KEY = 'alnasma_orders';
+
+// ──────────────────────────────────────────────
+// PASSWORD GATE
+// ──────────────────────────────────────────────
+(function checkPassword() {
+  const session = sessionStorage.getItem('admin_auth');
+  if (session === 'ok') return;
+  const pw = prompt('🔒 أدخل كلمة المرور للدخول إلى لوحة التحكم:');
+  if (pw !== ADMIN_PASSWORD) {
+    alert('كلمة المرور غير صحيحة.');
+    window.location.href = 'index.html';
+  } else {
+    sessionStorage.setItem('admin_auth', 'ok');
+  }
+})();
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let allOrders = [];
+let currentFilter = 'all';
+let expandedRow = null;
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  setHeaderDate();
+  loadOrders();
+});
+
+function setHeaderDate() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('ar-KW', opts);
+}
+
+// ──────────────────────────────────────────────
+// LOAD FROM LOCALSTORAGE
+// ──────────────────────────────────────────────
+function loadOrders() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    allOrders = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(allOrders)) allOrders = [];
+  } catch(e) {
+    allOrders = [];
+  }
+  // Inject demo data if empty (so owner can see the layout)
+  if (allOrders.length === 0) {
+    allOrders = getDemoOrders();
+  }
+  updateStats();
+  renderTable();
+}
+
+function saveOrders() {
+  localStorage.setItem(LS_KEY, JSON.stringify(allOrders));
+}
+
+// ──────────────────────────────────────────────
+// DEMO DATA
+// ──────────────────────────────────────────────
+function getDemoOrders() {
+  const now = Date.now();
+  return [
+    {
+      order_num: '#250501-0001',
+      name: 'فهد العتيبي',
+      phone: '96599112233',
+      items: [
+        { name: 'كيكة التايجر', qty: 1, price: 4.500 },
+        { name: 'بسبوسة فستقية', qty: 2, price: 2.250 }
+      ],
+      total: 9.000,
+      address: 'السالمية، شارع 14، بلوك 5',
+      location: null,
+      payment: 'كاش عند الاستلام',
+      notes: 'يرجى التأكيد قبل التوصيل',
+      status: 'new',
+      created_at: new Date(now - 10*60*1000).toISOString()
+    },
+    {
+      order_num: '#250501-0002',
+      name: 'منال الرشيدي',
+      phone: '96555443322',
+      items: [
+        { name: 'ورق عنب كويتي', qty: 3, price: 3.000 }
+      ],
+      total: 9.000,
+      address: null,
+      location: '29.3759,47.9774',
+      payment: 'كاش عند الاستلام',
+      notes: '',
+      status: 'delivery',
+      created_at: new Date(now - 45*60*1000).toISOString()
+    },
+    {
+      order_num: '#250501-0003',
+      name: 'عبدالله الحربي',
+      phone: '96566778899',
+      items: [
+        { name: 'كيكة التايجر', qty: 2, price: 4.500 }
+      ],
+      total: 9.000,
+      address: 'الجابرية، قطعة 10',
+      location: null,
+      payment: 'بطاقة',
+      notes: '',
+      status: 'done',
+      created_at: new Date(now - 3*60*60*1000).toISOString()
+    }
+  ];
+}
+
+// ──────────────────────────────────────────────
+// STATS
+// ──────────────────────────────────────────────
+function updateStats() {
+  const today = new Date().toDateString();
+  const todayOrders = allOrders.filter(o => new Date(o.created_at).toDateString() === today);
+  const revenue = todayOrders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+  const pending = todayOrders.filter(o => o.status === 'new' || o.status === 'delivery').length;
+
+  document.getElementById('stat-count').textContent   = todayOrders.length;
+  document.getElementById('stat-revenue').textContent = revenue.toFixed(3) + ' د.ك';
+  document.getElementById('stat-pending').textContent = pending;
+}
+
+// ──────────────────────────────────────────────
+// RENDER TABLE
+// ──────────────────────────────────────────────
+function renderTable() {
+  const search = document.getElementById('search-box').value.trim().toLowerCase();
+  const sort   = document.getElementById('sort-select').value;
+
+  let orders = [...allOrders];
+
+  // Filter by status
+  if (currentFilter !== 'all') {
+    orders = orders.filter(o => o.status === currentFilter);
+  }
+
+  // Search
+  if (search) {
+    orders = orders.filter(o =>
+      (o.order_num || '').toLowerCase().includes(search) ||
+      (o.name      || '').toLowerCase().includes(search)
+    );
+  }
+
+  // Sort
+  orders.sort((a, b) => {
+    const ta = new Date(a.created_at).getTime();
+    const tb = new Date(b.created_at).getTime();
+    return sort === 'newest' ? tb - ta : ta - tb;
+  });
+
+  const tbody = document.getElementById('orders-body');
+  tbody.innerHTML = '';
+
+  const empty = document.getElementById('empty-state');
+
+  if (orders.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  orders.forEach((order, idx) => {
+    // Main row
+    const tr = document.createElement('tr');
+    tr.className = 'order-row border-b border-gray-100';
+    tr.setAttribute('data-idx', findOrderIndex(order));
+    tr.onclick = function(e) {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      toggleExpand(tr, order);
+    };
+
+    const itemsSummary = (order.items || []).map(i => `${i.name} ×${i.qty}`).join('، ');
+    const truncated = itemsSummary.length > 30 ? itemsSummary.slice(0,30) + '…' : itemsSummary;
+    const statusBadge = statusHtml(order.status);
+    const timeAgo = relativeTime(order.created_at);
+    const phone = (order.phone || '').replace(/\D/g, '');
+    const addressCell = buildAddressCell(order);
+
+    tr.innerHTML = `
+      <td class="px-3 py-3 font-mono font-bold text-xs" style="color:#4E7854;">${order.order_num || '—'}</td>
+      <td class="px-3 py-3 font-semibold">${escHtml(order.name || '—')}</td>
+      <td class="px-3 py-3">
+        ${phone ? `<a href="tel:${phone}" class="underline" style="color:#4E7854;" onclick="event.stopPropagation()">${formatPhone(phone)}</a>` : '—'}
+      </td>
+      <td class="px-3 py-3 text-gray-600 hidden md:table-cell" title="${escHtml(itemsSummary)}">${escHtml(truncated) || '—'}</td>
+      <td class="px-3 py-3 font-bold" style="color:#C9A84C;">${formatKWD(order.total)}</td>
+      <td class="px-3 py-3 hidden lg:table-cell">${addressCell}</td>
+      <td class="px-3 py-3 hidden lg:table-cell text-xs">${escHtml(order.payment || '—')}</td>
+      <td class="px-3 py-3 text-xs text-gray-500">${timeAgo}</td>
+      <td class="px-3 py-3">${statusBadge}</td>
+      <td class="px-3 py-3">
+        <div class="flex gap-1 flex-wrap">
+          ${phone ? `<button class="btn-wa rounded-lg px-2 py-1 text-xs font-bold"
+            onclick="event.stopPropagation(); contactWA('${phone}','${escJs(order.order_num)}','${escJs(order.name)}')"
+            title="واتساب">📱</button>` : ''}
+          <button class="btn-done rounded-lg px-2 py-1 text-xs font-bold"
+            onclick="event.stopPropagation(); cycleStatus(${findOrderIndex(order)}, this)"
+            title="تغيير الحالة">✓</button>
+          <button class="btn-print rounded-lg px-2 py-1 text-xs font-bold"
+            onclick="event.stopPropagation(); printOrder(${findOrderIndex(order)})"
+            title="طباعة">🖨</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ──────────────────────────────────────────────
+// ROW EXPAND
+// ──────────────────────────────────────────────
+function toggleExpand(tr, order) {
+  // Remove previous expand
+  const prev = document.getElementById('expand-row');
+  if (prev) {
+    if (expandedRow === tr) {
+      prev.remove();
+      expandedRow = null;
+      return;
+    }
+    prev.remove();
+  }
+  expandedRow = tr;
+
+  const itemsHtml = (order.items || []).map(i =>
+    `<tr><td class="py-1 pe-4">${escHtml(i.name)}</td><td class="py-1 pe-4 text-center">×${i.qty}</td><td class="py-1 font-bold" style="color:#C9A84C;">${formatKWD(i.price)}</td></tr>`
+  ).join('');
+
+  const locLink = order.location
+    ? `<a href="https://maps.google.com/?q=${order.location}" target="_blank" class="underline" style="color:#4E7854;">📍 فتح الخريطة</a>`
+    : (order.address ? escHtml(order.address) : '—');
+
+  const expand = document.createElement('tr');
+  expand.id = 'expand-row';
+  expand.className = 'row-expand';
+  expand.innerHTML = `
+    <td colspan="10" class="px-5 py-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
+        <div>
+          <p class="font-bold mb-2" style="color:#1C3020;">المنتجات</p>
+          <table class="w-full">
+            ${itemsHtml}
+            <tr class="border-t"><td class="pt-2 font-bold" colspan="2">الإجمالي</td><td class="pt-2 font-bold" style="color:#C9A84C;">${formatKWD(order.total)}</td></tr>
+          </table>
+        </div>
+        <div>
+          <p class="font-bold mb-2" style="color:#1C3020;">تفاصيل التوصيل</p>
+          <p class="mb-1"><span class="font-semibold">العنوان:</span> ${locLink}</p>
+          <p class="mb-1"><span class="font-semibold">طريقة الدفع:</span> ${escHtml(order.payment || '—')}</p>
+          ${order.notes ? `<p class="mb-1"><span class="font-semibold">ملاحظات:</span> ${escHtml(order.notes)}</p>` : ''}
+        </div>
+        <div>
+          <p class="font-bold mb-2" style="color:#1C3020;">تغيير الحالة</p>
+          <div class="flex flex-col gap-2">
+            <button onclick="setStatus(${findOrderIndex(order)}, 'new')"
+              class="px-4 py-2 rounded-lg text-sm font-bold border status-new">🆕 جديد</button>
+            <button onclick="setStatus(${findOrderIndex(order)}, 'delivery')"
+              class="px-4 py-2 rounded-lg text-sm font-bold border status-delivery">🚗 قيد التوصيل</button>
+            <button onclick="setStatus(${findOrderIndex(order)}, 'done')"
+              class="px-4 py-2 rounded-lg text-sm font-bold border status-done">✅ تم التوصيل</button>
+          </div>
+        </div>
+      </div>
+    </td>
+  `;
+  tr.after(expand);
+}
+
+// ──────────────────────────────────────────────
+// STATUS
+// ──────────────────────────────────────────────
+function statusHtml(status) {
+  const map = {
+    new:      ['status-new',      'جديد'],
+    delivery: ['status-delivery', 'قيد التوصيل'],
+    done:     ['status-done',     'تم التوصيل'],
+  };
+  const [cls, label] = map[status] || ['status-new', status];
+  return `<span class="${cls} px-2 py-0.5 rounded-full text-xs font-bold">${label}</span>`;
+}
+
+function cycleStatus(idx, btn) {
+  const order = allOrders[idx];
+  if (!order) return;
+  const cycle = { new: 'delivery', delivery: 'done', done: 'new' };
+  order.status = cycle[order.status] || 'new';
+  saveOrders();
+  updateStats();
+  renderTable();
+}
+
+function setStatus(idx, status) {
+  const order = allOrders[idx];
+  if (!order) return;
+  order.status = status;
+  saveOrders();
+  updateStats();
+  // Remove expand row, re-render
+  const prev = document.getElementById('expand-row');
+  if (prev) prev.remove();
+  expandedRow = null;
+  renderTable();
+}
+
+// ──────────────────────────────────────────────
+// FILTER
+// ──────────────────────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.f === f);
+  });
+  renderTable();
+}
+
+// ──────────────────────────────────────────────
+// WHATSAPP
+// ──────────────────────────────────────────────
+function contactWA(phone, orderNum, name) {
+  const msg = encodeURIComponent(
+    `مرحباً ${name}، شكراً لطلبك من النسمة سويت 🍯\nرقم طلبك: ${orderNum}\nسيصلك الطلب قريباً إن شاء الله ✅`
+  );
+  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+
+// ──────────────────────────────────────────────
+// PRINT
+// ──────────────────────────────────────────────
+function printOrder(idx) {
+  const order = allOrders[idx];
+  if (!order) return;
+
+  const itemsRows = (order.items || []).map(i =>
+    `<tr><td style="padding:6px 0; border-bottom:1px solid #eee;">${escHtml(i.name)}</td>
+     <td style="padding:6px 8px; text-align:center; border-bottom:1px solid #eee;">×${i.qty}</td>
+     <td style="padding:6px 0; text-align:left; border-bottom:1px solid #eee;">${formatKWD(i.price)}</td></tr>`
+  ).join('');
+
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <title>طلب ${order.order_num}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+      <style>
+        body { font-family:'Cairo',sans-serif; padding:30px; color:#1C3020; max-width:400px; margin:auto; }
+        h2 { color:#1C3020; margin:0; }
+        .gold { color:#C9A84C; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
+        .section { margin-top:16px; }
+        .label { font-weight:700; font-size:13px; color:#4E7854; }
+        .divider { border:none; border-top:2px solid #C9A84C; margin:12px 0; }
+        @media print { button { display:none; } }
+      </style>
+    </head>
+    <body>
+      <h2>🍯 النسمة سويت</h2>
+      <p class="gold" style="margin:2px 0;">لوحة الطلبات</p>
+      <hr class="divider">
+      <div class="section">
+        <p><span class="label">رقم الطلب:</span> ${order.order_num}</p>
+        <p><span class="label">الاسم:</span> ${escHtml(order.name)}</p>
+        <p><span class="label">الجوال:</span> ${escHtml(order.phone)}</p>
+        <p><span class="label">العنوان:</span> ${order.address || (order.location ? 'GPS: ' + order.location : '—')}</p>
+        <p><span class="label">الدفع:</span> ${escHtml(order.payment || '—')}</p>
+        ${order.notes ? `<p><span class="label">ملاحظات:</span> ${escHtml(order.notes)}</p>` : ''}
+      </div>
+      <hr class="divider">
+      <p class="label">المنتجات</p>
+      <table>${itemsRows}
+        <tr><td style="padding-top:8px; font-weight:700;" colspan="2">الإجمالي</td>
+            <td style="padding-top:8px; font-weight:700; text-align:left; color:#C9A84C;">${formatKWD(order.total)}</td></tr>
+      </table>
+      <hr class="divider">
+      <p style="font-size:11px; color:#888; text-align:center;">${new Date(order.created_at).toLocaleString('ar-KW')}</p>
+      <br>
+      <button onclick="window.print()" style="background:#1C3020;color:#fff;padding:10px 24px;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:14px;cursor:pointer;">🖨 طباعة</button>
+    </body></html>
+  `);
+  win.document.close();
+}
+
+// ──────────────────────────────────────────────
+// SUPABASE
+// ──────────────────────────────────────────────
+let supabaseOpen = false;
+
+function toggleSupabase() {
+  supabaseOpen = !supabaseOpen;
+  const panel = document.getElementById('supabase-panel');
+  const arrow = document.getElementById('supa-arrow');
+  if (supabaseOpen) {
+    panel.style.maxHeight = '300px';
+    panel.style.opacity   = '1';
+    arrow.textContent = '▲';
+  } else {
+    panel.style.maxHeight = '0';
+    panel.style.opacity   = '0';
+    arrow.textContent = '▼';
+  }
+}
+
+async function fetchSupabase() {
+  const url = document.getElementById('supa-url').value.trim();
+  const key  = document.getElementById('supa-key').value.trim();
+  const btn  = document.getElementById('supa-btn');
+  const spin = document.getElementById('supa-spinner');
+  const msg  = document.getElementById('supa-msg');
+
+  if (!url || !key) {
+    showSupaMsg('يرجى إدخال الـ URL والـ Key أولاً.', 'red');
+    return;
+  }
+
+  btn.disabled = true;
+  spin.classList.remove('hidden');
+  msg.classList.add('hidden');
+
+  try {
+    const res = await fetch(`${url}/rest/v1/orders?select=*&order=created_at.desc&limit=500`, {
+      headers: {
+        'apikey': key,
+        'Authorization': 'Bearer ' + key,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `خطأ HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('البيانات المُستلمة غير صحيحة');
+
+    // Merge: deduplicate by order_num
+    const existingNums = new Set(allOrders.map(o => o.order_num));
+    let added = 0;
+    for (const row of data) {
+      if (!existingNums.has(row.order_num)) {
+        allOrders.push(row);
+        existingNums.add(row.order_num);
+        added++;
+      }
+    }
+
+    saveOrders();
+    updateStats();
+    renderTable();
+    showSupaMsg(`✅ تم تحميل ${data.length} طلب، أُضيف ${added} جديد.`, 'green');
+
+  } catch (e) {
+    showSupaMsg('❌ ' + (e.message || 'فشل الاتصال بـ Supabase'), 'red');
+  } finally {
+    btn.disabled = false;
+    spin.classList.add('hidden');
+  }
+}
+
+function showSupaMsg(text, color) {
+  const msg = document.getElementById('supa-msg');
+  msg.textContent = text;
+  msg.style.color = color === 'green' ? '#166534' : '#b91c1c';
+  msg.classList.remove('hidden');
+}
+
+// ──────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────
+function findOrderIndex(order) {
+  return allOrders.indexOf(order);
+}
+
+function formatKWD(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return '—';
+  return n.toFixed(3) + ' د.ك';
+}
+
+function formatPhone(phone) {
+  // Format: +965 XXXX XXXX
+  const p = phone.replace(/\D/g, '');
+  if (p.startsWith('965') && p.length === 11) {
+    return `+965 ${p.slice(3,7)} ${p.slice(7)}`;
+  }
+  return '+' + p;
+}
+
+function buildAddressCell(order) {
+  if (order.location) {
+    return `<a href="https://maps.google.com/?q=${escHtml(order.location)}" target="_blank"
+      class="underline text-xs" style="color:#4E7854;" onclick="event.stopPropagation()">📍 GPS</a>`;
+  }
+  if (order.address) {
+    const short = order.address.length > 25 ? order.address.slice(0,25) + '…' : order.address;
+    return `<span title="${escHtml(order.address)}">${escHtml(short)}</span>`;
+  }
+  return '—';
+}
+
+function relativeTime(iso) {
+  if (!iso) return '—';
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60)   return 'الآن';
+  if (diff < 3600) return `منذ ${Math.floor(diff/60)} دقيقة`;
+  if (diff < 86400) return `منذ ${Math.floor(diff/3600)} ساعة`;
+  return `منذ ${Math.floor(diff/86400)} يوم`;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escJs(s) {
+  if (!s) return '';
+  return String(s).replace(/'/g,"\\'");
+}
+</script>
+</body>
+</html>
