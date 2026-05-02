@@ -624,15 +624,15 @@ const ORDER_CONFIG = {
 const CDN='https://tapcom-live.ams3.cdn.digitaloceanspaces.com/media/cache/';
 const WA='96555417907';
 const products=[
-  {id:1558920,cat:'tiger',name:'كيكه التايجر',price:7.750,img:'imgs/tiger-cake.webp',desc:'كريمه خفيفه على كيكه طرية — ما تقدر تقول لأ'},
-  {id:1647511,cat:'mango',name:'كيكة المانجو',price:7.750,img:'imgs/mango-cake.webp',desc:'مانجو طازجة فوق كيكه ناعمه — حلاوة صيفية'},
+  {id:1558920,cat:'tiger',name:'كيكه التايجر',price:7.750,img:'imgs/tiger-cake.webp',desc:'كيكة طبقات هشة بكريمة مخفوقة وخطوط تايجر'},
+  {id:1647511,cat:'mango',name:'كيكة المانجو',price:7.750,img:'imgs/mango-cake.webp',desc:'كيكة خفيفة بكريمة مانجو وقطع مانجو طازجة'},
   {id:1513942,cat:'grape',name:'ورق عنب سبايسي',price:6.750,img:'imgs/grape-spicy.webp'},
   {id:1513943,cat:'grape',name:'ورق عنب رمان',price:6.750,img:'imgs/grape-pomegranate.webp'},
   {id:1513944,cat:'grape',name:'ورق عنب سادة',price:6.750,img:'imgs/grape-plain.webp'},
   {id:1471878,cat:'basbousa',name:'بسبوسه',price:6.750,img:'imgs/basbousa.webp'},
   {id:1544739,cat:'basbousa',name:'ميني بسبوسه',price:7.500,img:'imgs/mini-basbousa.webp'},
-  {id:1471875,cat:'fostkya',name:'فستقيه بستاشيو',price:7.750,img:'imgs/pistachio.webp',desc:'طبقات فستق أخضر فاخر على قاعدة هشة وزبدية'},
-  {id:1471883,cat:'drinks',name:'قهوه عربي',price:3.500,img:'imgs/arabic-coffee.webp',desc:'هيل وزعفران كويتي — مزاج ما يكمل إلا فيه'},
+  {id:1471875,cat:'fostkya',name:'فستقيه بستاشيو',price:7.750,img:'imgs/pistachio.webp',desc:'طبقات فستق بكريمة بستاشيو وقاعدة زبدية هشة'},
+  {id:1471883,cat:'drinks',name:'قهوه عربي',price:3.500,img:'imgs/arabic-coffee.webp',desc:'قهوة عربية بالهيل والزعفران بطعم دافئ ومتوازن'},
 ];
 const pairings={
   1558920:[1471883,1471875],
@@ -892,7 +892,7 @@ function renderProducts(){
         </div>
         <div class="p-4 flex flex-col flex-1">
           <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">ورق عنب</h3>
-          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">مطبوخ بزيت الزيتون — ثلاث نكهات تختار منها</p>
+          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">ورق عنب بزيت الزيتون وحشوة رز بثلاث نكهات</p>
           <div class="flex items-center justify-between mt-auto">
             <div>
               <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">6.750</span>
@@ -913,7 +913,7 @@ function renderProducts(){
         </div>
         <div class="p-4 flex flex-col flex-1">
           <h3 class="font-semibold text-g-dkr text-sm leading-snug mb-1">بسبوسه</h3>
-          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">محلبية ذهبية بالقطر والنارجيل — أصل طعم البيت</p>
+          <p class="text-xs mb-3 flex-1" style="color:rgba(28,48,32,.45);line-height:1.4">بسبوسة سميد مشربة بالقطر ومغطاة بجوز الهند</p>
           <div class="flex items-center justify-between mt-auto">
             <div>
               <span class="text-g font-black text-lg" style="font-family:'Noto Serif Arabic',serif">${basPrices[basVariant].toFixed(3)}</span>
